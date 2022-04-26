@@ -1,6 +1,6 @@
 {
   "name": "openfl",
-  "version": "8.9.7",
+  "version": "8.9.8",
   "description": "A fast, productive library for 2D cross-platform development.",
   "keywords": [
     "openfl",
@@ -44,18 +44,18 @@
   "scripts": {
     "build": "npm run build-lib && npm run build-lib-esm && npm run build-dist && npm run build-tools && npm run build-swc && npm run build-docs",
     "build-dist": "npm run build-dist:dev && npm run build-dist:prod",
-    "build-dist:dev": "webpack --config webpack.dev.js",
-    "build-dist:prod": "webpack --config webpack.prod.js",
-    "build-docs": "typedoc --out docs scripts/importAll.ts --allowJs --entryPoint openfl --mode file --target es5 --module commonjs --plugins none --exclude \"**/{node_modules,test}/**/*.ts\" --readme none --theme default --includeDeclarations --disableOutputCheck --ignoreCompilerErrors",
+    "build-dist:dev": "webpack-cli --config webpack.dev.js",
+    "build-dist:prod": "webpack-cli --config webpack.prod.js",
+    "build-docs": "npx typedoc --out docs scripts/importAll.ts --allowJs --entryPoint openfl --mode file --target es5 --module commonjs --plugins none --exclude \"**/{node_modules,test}/**/*.ts\" --readme none --theme default --includeDeclarations --disableOutputCheck --ignoreCompilerErrors",
     "build-lib": "cd scripts && haxe build.hxml",
     "build-lib-esm": "cd scripts && node generate-es2015 gen",
     "build-lib-esm-reexports-barrels": "cd scripts && node generate-es2015 non-gen",
     "build-swc": "compc -load-config=node_modules/@apache-royale/royale-js/royale-asjs/frameworks/js-config.xml -keep-as3-metadata=JSModule -include-sources=lib -compiler.targets=SWF,JS -warnings=false -output=dist/openfl.swc",
     "build-tools": "cd scripts && haxe tools-npm.hxml",
-    "build-test-es5": "cd test/npm/es5 && webpack",
-    "build-test-es6": "cd test/npm/es6 && webpack",
-    "build-test-haxe": "cd test/npm/haxe && haxe build.hxml && webpack",
-    "build-test-typescript": "cd test/npm/typescript && tsc -p tsconfig.json && webpack",
+    "build-test-es5": "cd test/npm/es5 && webpack-cli",
+    "build-test-es6": "cd test/npm/es6 && webpack-cli",
+    "build-test-haxe": "cd test/npm/haxe && haxe build.hxml && webpack-cli",
+    "build-test-typescript": "cd test/npm/typescript && tsc -p tsconfig.json && webpack-cli",
     "dev-link": "npm link lime && npm link hxgenjs && npm link hxnodejs && npm link hxp && npm link format",
     "prepublishOnly": "npm run build",
     "serve": "http-server -c-1 --cors",
@@ -104,7 +104,7 @@
     "uglifyjs-webpack-plugin": "^1.3.0",
     "watch": "^1.0.2",
     "webpack": "^4.20.1",
-    "webpack-cli": "^3.1.1",
+    "webpack-cli": "^3.3.12",
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
