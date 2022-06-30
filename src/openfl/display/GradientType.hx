@@ -2,7 +2,6 @@ package openfl.display;
 
 #if !flash
 
-#if !openfljs
 /**
 	The GradientType class provides values for the `type` parameter
 	in the `beginGradientFill()` and
@@ -51,24 +50,7 @@ package openfl.display;
 		}
 	}
 }
-#else
-@SuppressWarnings("checkstyle:FieldDocComment")
-@:enum abstract GradientType(String) from String to String
-{
-	public var LINEAR = "linear";
-	public var RADIAL = "radial";
 
-	@:noCompletion private inline static function fromInt(value:Null<Int>):GradientType
-	{
-		return switch (value)
-		{
-			case 0: LINEAR;
-			case 1: RADIAL;
-			default: null;
-		}
-	}
-}
-#end
 #else
 typedef GradientType = flash.display.GradientType;
 #end

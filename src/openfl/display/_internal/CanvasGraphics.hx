@@ -101,7 +101,7 @@ class CanvasGraphics
 	}
 
 	@SuppressWarnings("checkstyle:Dynamic")
-	private static function createGradientPattern(type:GradientType, colors:Array<Dynamic>, alphas:Array<Dynamic>, ratios:Array<Dynamic>, matrix:Matrix,
+	private static function createGradientPattern(type:Any, colors:Array<Dynamic>, alphas:Array<Dynamic>, ratios:Array<Dynamic>, matrix:Matrix,
 			spreadMethod:SpreadMethod, interpolationMethod:InterpolationMethod, focalPointRatio:Float):#if (js && html5) CanvasPattern #else Void #end
 	{
 		#if (js && html5)
@@ -117,7 +117,13 @@ class CanvasGraphics
 			releaseMatrix = true;
 		}
 
-		switch (type)
+		var gradientType: GradientType = type;
+
+		if(Std.is(type, String)){
+			gradientType = (type: String);
+		}
+
+		switch (gradientType)
 		{
 			case RADIAL:
 				var radius = 819.2;
@@ -134,6 +140,8 @@ class CanvasGraphics
 				pendingMatrix = matrix.clone();
 				inversePendingMatrix = matrix.clone();
 				inversePendingMatrix.invert();
+			default:
+				trace('wrong gradient type:', type);
 		}
 
 		var rgb, alpha, r, g, b, ratio;

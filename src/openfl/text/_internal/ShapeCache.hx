@@ -35,7 +35,7 @@ class ShapeCache
 	public function cache(formatRange:TextFormatRange, getPositions:#if (js && html5) Void -> Array<Float>, wordKey:String = null):Array<Float> #else TextLayout):Array<GlyphPosition>#end
 	{
 		var formatKey:String = formatRange.format.__cacheKey;
-		#if (!js && !html5)
+		#if (!js || !html5)
 		var wordKey:String = getPositions.text;
 		#end
 		if (wordKey.length > 15)
