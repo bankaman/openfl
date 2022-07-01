@@ -1,6 +1,6 @@
 {
   "name": "openfl",
-  "version": "8.9.7",
+  "version": "8.9.8",
   "description": "A fast, productive library for 2D cross-platform development.",
   "keywords": [
     "openfl",
@@ -80,7 +80,7 @@
     "watch": "watch \"echo watch: Compiling... && npm run build-lib -s && echo watch: Compiled successfully.\" ./src ./scripts ./node_modules/lime/src"
   },
   "devDependencies": {
-    "@apache-royale/royale-js": "^0.9.3",
+    "@apache-royale/royale-js": "^0.9.8",
     "@types/lodash": "^4.14.116",
     "@types/mocha": "^5.2.5",
     "babel-core": "^6.26.3",
