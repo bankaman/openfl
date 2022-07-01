@@ -999,7 +999,7 @@ class SWFLiteExporter {
                     var funcPcode = data.pcode[nameIndex.getIndex()];
                     var temp = processOpCodes(funcPcode, cls);
                     Log.info("", "code: " + temp);
-                    stack.push('function(){\n' + temp + '}');
+                    stack.push('()=>{\n' + temp + '}');
                 case _:
                     // TODO: throw() on unsupported pcodes
                     Log.info("", "pcode " + pcode);
