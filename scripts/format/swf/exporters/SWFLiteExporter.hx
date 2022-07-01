@@ -801,178 +801,7 @@ class SWFLiteExporter {
                                 var frameNumOneIndexed = Std.parseInt(AVM2.FRAME_SCRIPT_METHOD_NAME.matched(1));
                                 Log.info("", "frame script #" + frameNumOneIndexed);
                                 var pcodes:Array<OpCode> = data.pcode[idx.getIndex()];
-                                var js = "";
-                                var prop:MultiName = null;
-                                var stack:Array<Dynamic> = new Array();
-                                for (pcode in pcodes) {
-                                    switch (pcode)
-                                    {
-                                        case OThis:
-                                            stack.push("this");
-                                        case OScope:
-                                            stack.pop();
-                                        case OFindPropStrict(nameIndex):
-                                        //										prop = data.abcData.resolveMultiNameByIndex(nameIndex);
-                                        case OGetLex(nameIndex):
-                                            Log.info("", "OGetLex");
-                                            prop = data.abcData.resolveMultiNameByIndex(nameIndex);
-
-                                            var fullname = "";
-
-                                            if (prop != null) {
-                                                fullname += AVM2.getFullName(data.abcData, prop, cls);
-                                                stack.push(fullname);
-                                                Log.info("", "stack:" + stack);
-                                            }
-                                        case OGetProp(nameIndex):
-                                            var fullname = "";
-
-                                            prop = data.abcData.resolveMultiNameByIndex(nameIndex);
-
-                                            if (prop != null) {
-                                                fullname += stack.pop() + "." + AVM2.getFullName(data.abcData, prop, cls);
-                                            }
-
-                                            Log.info("", "OGetProp fullname: " + fullname);
-
-                                            stack.push(fullname);
-                                        case OSetProp(nameIndex):
-                                            prop = data.abcData.resolveMultiNameByIndex(nameIndex);
-                                            Log.info("", "OSetProp stack: " + prop + ", " + stack);
-
-                                            var result = stack.pop();
-
-                                            var name = null;
-
-                                            if (prop != null) {
-                                                if (prop.name != null) {
-                                                    name = "." + prop.name;
-                                                }
-                                                else {
-                                                    name = "[" + stack.pop() + "]";
-                                                }
-                                            }
-                                            else {
-                                                Log.info("", "OSetProp stack prop is null");
-                                                break;
-                                            }
-
-                                            var instance = stack.pop();
-
-                                            if (instance != "this") {
-                                                instance = "this" + "." + instance;
-                                            }
-
-                                            js += instance + name + " = " + result + ";\n";
-                                        case OString(strIndex):
-                                            var str = data.abcData.getStringByIndex(strIndex);
-                                            stack.push("\"" + str + "\"");
-                                        case OInt(i):
-                                            stack.push(i);
-                                            Log.info("", "int: " + i);
-                                        case OSmallInt(i):
-                                            stack.push(i);
-                                            Log.info("", "smallint: " + i);
-                                        case OCallPropVoid(nameIndex, argCount):
-                                            var temp = AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
-
-                                            if (stack.length > 0) {
-                                                js += stack.pop() + ".";
-                                            }
-                                            else {
-                                                js += "this" + ".";
-                                            }
-
-                                            js += temp;
-                                            js += ";\n";
-                                        case OCallProperty(nameIndex, argCount):
-                                            Log.info("", "OCallProperty stack: " + stack);
-
-                                            if (prop != null) {
-                                                var temp = AVM2.getFullName(data.abcData, prop, cls)
-                                                + "."
-                                                + AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
-                                                stack.pop();
-                                                stack.push(temp);
-                                            }
-                                            Log.info("", "stack: " + stack);
-                                        case OConstructProperty(nameIndex, argCount):
-                                            Log.info("", "OConstructProperty stack: " + stack);
-
-                                            var temp = "new ";
-                                            temp += AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
-                                            stack.push(temp);
-
-                                            Log.info("", "OConstructProperty value: " + temp);
-                                        case OInitProp(nameIndex):
-                                            Log.info("", "OInitProp stack: " + stack);
-
-                                            prop = data.abcData.resolveMultiNameByIndex(nameIndex);
-
-                                            var temp = stack.pop();
-
-                                            js += stack.pop() + "." + prop.name + " = " + Std.string(temp) + ";\n";
-                                        case ODup:
-                                            stack.push(stack[stack.length - 1]);
-                                        case OArray(argCount):
-                                            Log.info("", "before array: " + stack);
-
-                                            var str = "";
-                                            var temp = [];
-                                            for (i in 0...argCount) {
-                                                temp.push(stack.pop());
-                                            }
-                                            temp.reverse();
-                                            stack.push(temp);
-
-                                            Log.info("", "after array: " + stack);
-                                        case ORetVoid:
-                                        case ONull:
-                                            stack.push(null);
-                                        case OOp(op):
-                                            var _operator = null;
-                                            switch (op)
-                                            {
-                                                case OpMul:
-                                                    _operator = "*";
-                                                case OpAdd:
-                                                    _operator = "+";
-                                                case _:
-                                                    Log.info("", "OOp");
-                                            }
-
-                                            if (op == OpAs) {
-                                                Log.info("", "cast to " + stack.pop() + " is discarded");
-                                            }
-
-                                            if (_operator != null) {
-                                                var temp = stack.pop();
-                                                stack.push(Std.string(stack.pop()) + " " + _operator + " " + Std.string(temp));
-                                            }
-                                        case OJump(j, delta):
-                                            switch (j)
-                                            {
-                                                case JNeq:
-                                                    // Log.info("", stack[0]);
-                                                    var temp = stack.pop();
-                                                    js += "if (" + Std.string(stack.pop()) + " == " + Std.string(temp) + ")\n";
-                                                case JAlways:
-                                                    js += "else\n";
-                                                    Log.info("", Std.string(delta));
-                                                case JFalse:
-                                                    js += "if (" + Std.string(stack.pop()) + ")\n";
-                                                case _:
-                                                    Log.info("", "OJump");
-                                            }
-                                        case OTrue:
-                                            stack.push(true);
-                                        case OFalse:
-                                            stack.push(false);
-                                        case _:
-                                            // TODO: throw() on unsupported pcodes
-                                            Log.info("", "pcode " + pcode);
-                                    }
-                                }
+                                var js = processOpCodes(pcodes, cls);
                                 Log.info("", "javascript:\n" + js);
 
                                 if (js != null && js.indexOf("null.") > -1) {
@@ -990,6 +819,195 @@ class SWFLiteExporter {
             }
         }
         #end
+    }
+
+    private function processOpCodes(pcodes:Array<OpCode>, cls:ClassDef) {
+        var js = "";
+        var prop:MultiName = null;
+        var stack:Array<Dynamic> = new Array();
+        for (pcode in pcodes) {
+            switch (pcode)
+            {
+                case OThis:
+                    stack.push("this");
+                case OScope:
+                    stack.pop();
+                case OFindPropStrict(nameIndex):
+                //										prop = data.abcData.resolveMultiNameByIndex(nameIndex);
+                case OGetLex(nameIndex):
+                    Log.info("", "OGetLex");
+                    prop = data.abcData.resolveMultiNameByIndex(nameIndex);
+
+                    var fullname = "";
+
+                    if (prop != null) {
+                        fullname += AVM2.getFullName(data.abcData, prop, cls);
+                        stack.push(fullname);
+                        Log.info("", "stack:" + stack);
+                    }
+                case OGetProp(nameIndex):
+                    var fullname = "";
+
+                    prop = data.abcData.resolveMultiNameByIndex(nameIndex);
+
+                    if (prop != null) {
+                        fullname += stack.pop() + "." + AVM2.getFullName(data.abcData, prop, cls);
+                    }
+
+                    Log.info("", "OGetProp fullname: " + fullname);
+
+                    stack.push(fullname);
+                case OSetProp(nameIndex):
+                    prop = data.abcData.resolveMultiNameByIndex(nameIndex);
+                    Log.info("", "OSetProp stack: " + prop + ", " + stack);
+
+                    var result = stack.pop();
+
+                    var name = null;
+
+                    if (prop != null) {
+                        if (prop.name != null) {
+                            name = "." + prop.name;
+                        }
+                        else {
+                            name = "[" + stack.pop() + "]";
+                        }
+                    }
+                    else {
+                        Log.info("", "OSetProp stack prop is null");
+                        break;
+                    }
+
+                    var instance = stack.pop();
+
+                    if (instance != "this") {
+                        instance = "this" + "." + instance;
+                    }
+
+                    js += instance + name + " = " + result + ";\n";
+                case OString(strIndex):
+                    var str = data.abcData.getStringByIndex(strIndex);
+                    stack.push("\"" + str + "\"");
+                case OInt(i):
+                    stack.push(i);
+                    Log.info("", "int: " + i);
+                case OSmallInt(i):
+                    stack.push(i);
+                    Log.info("", "smallint: " + i);
+                case OCallPropVoid(nameIndex, argCount):
+                    var temp = AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
+
+                    if (stack.length > 0) {
+                        js += stack.pop() + ".";
+                    }
+                    else {
+                        js += "this" + ".";
+                    }
+
+                    js += temp;
+                    js += ";\n";
+                case OCallProperty(nameIndex, argCount):
+                    Log.info("", "OCallProperty stack: " + stack);
+
+                    if (prop != null) {
+                        var temp = AVM2.getFullName(data.abcData, prop, cls)
+                        + "."
+                        + AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
+                        stack.pop();
+                        stack.push(temp);
+                    }
+                    Log.info("", "stack: " + stack);
+                case OConstructProperty(nameIndex, argCount):
+                    Log.info("", "OConstructProperty stack: " + stack);
+
+                    var temp = "new ";
+                    temp += AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
+                    stack.push(temp);
+
+                    Log.info("", "OConstructProperty value: " + temp);
+                case OInitProp(nameIndex):
+                    Log.info("", "OInitProp stack: " + stack);
+
+                    prop = data.abcData.resolveMultiNameByIndex(nameIndex);
+
+                    var temp = stack.pop();
+
+                    js += stack.pop() + "." + prop.name + " = " + Std.string(temp) + ";\n";
+                case ODup:
+                    stack.push(stack[stack.length - 1]);
+                case OArray(argCount):
+                    Log.info("", "before array: " + stack);
+
+                    var str = "";
+                    var temp = [];
+                    for (i in 0...argCount) {
+                        temp.push(stack.pop());
+                    }
+                    temp.reverse();
+                    stack.push(temp);
+
+                    Log.info("", "after array: " + stack);
+                case ORetVoid:
+                case ONull:
+                    stack.push(null);
+                case OOp(op):
+                    var _operator = null;
+                    switch (op)
+                    {
+                        case OpMul:
+                            _operator = "*";
+                        case OpAdd:
+                            _operator = "+";
+                        case _:
+                            Log.info("", "OOp");
+                    }
+
+                    if (op == OpAs) {
+                        Log.info("", "cast to " + stack.pop() + " is discarded");
+                    }
+
+                    if (_operator != null) {
+                        var temp = stack.pop();
+                        stack.push(Std.string(stack.pop()) + " " + _operator + " " + Std.string(temp));
+                    }
+                case OJump(j, delta):
+                    switch (j)
+                    {
+                        case JNeq:
+                            // Log.info("", stack[0]);
+                            var temp = stack.pop();
+                            js += "if (" + Std.string(stack.pop()) + " == " + Std.string(temp) + ")\n";
+                        case JAlways:
+                            js += "else\n";
+                            Log.info("", Std.string(delta));
+                        case JFalse:
+                            js += "if (" + Std.string(stack.pop()) + ")\n";
+                        case _:
+                            Log.info("", "OJump");
+                    }
+                case OTrue:
+                    stack.push(true);
+                case OFalse:
+                    stack.push(false);
+                case OSetReg(reg):
+                    Log.info("", "OSetReg(" + reg + "): stack:" + stack);
+                //js += "var r" + reg + "=" + stack.pop() + ";\n";
+                case ONewBlock:
+                    Log.info("", "ONewBlock " + stack);
+                case OFunction(nameIndex):
+                    Log.info("", "OFunction(" + nameIndex + ")" + stack);
+                    var funcPcode = data.pcode[nameIndex.getIndex()];
+                    var temp = processOpCodes(funcPcode, cls);
+                    Log.info("", "code: " + temp);
+                    stack.push('function(){\n' + temp + '}');
+                case _:
+                    // TODO: throw() on unsupported pcodes
+                    Log.info("", "pcode " + pcode);
+            }
+        }
+        var regex = ~/this\.flash\.utils_setTimeout/g;
+        js = regex.replace(js, "setTimeout");
+        return js;
     }
 
     private function processTag(tag:IDefinitionTag):SWFSymbol {
