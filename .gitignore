@@ -35,4 +35,5 @@ npm-debug.log
 *.map
 *.tgz
 bin/tools.js
+bin/tools-e.js
 *.bak

@@ -977,13 +977,16 @@ class SWFLiteExporter {
                             // Log.info("", stack[0]);
                             var temp = stack.pop();
                             js += "if (" + Std.string(stack.pop()) + " == " + Std.string(temp) + ")\n";
+                        case JNotGt:
+                            var temp = stack.pop();
+                            js += "if (" + Std.string(stack.pop()) + " > " + Std.string(temp) + ")\n";
                         case JAlways:
                             js += "else\n";
                             Log.info("", Std.string(delta));
                         case JFalse:
                             js += "if (" + Std.string(stack.pop()) + ")\n";
                         case _:
-                            Log.info("", "OJump");
+                            Log.info("", "OJump " + j);
                     }
                 case OTrue:
                     stack.push(true);
