@@ -60,18 +60,18 @@ using StringTools;
 using format.swf.exporters.SWFLiteExporter.AVM2;
 
 class SWFLiteExporter {
-    public var bitmapAlpha:Map<Int, ByteArray>;
-    public var bitmaps:Map<Int, ByteArray>;
-    public var bitmapTypes:Map<Int, BitmapType>;
-    public var sounds:Map<Int, ByteArray>;
-    public var soundTypes:Map<Int, SoundType>;
-    public var soundSymbolClassNames:Map<Int, String>;
-    public var filterClasses:Map<String, Bool>;
-    public var swfLite:SWFLite;
+    public var bitmapAlpha: Map<Int, ByteArray>;
+    public var bitmaps: Map<Int, ByteArray>;
+    public var bitmapTypes: Map<Int, BitmapType>;
+    public var sounds: Map<Int, ByteArray>;
+    public var soundTypes: Map<Int, SoundType>;
+    public var soundSymbolClassNames: Map<Int, String>;
+    public var filterClasses: Map<String, Bool>;
+    public var swfLite: SWFLite;
 
-    private var data:SWFRoot;
+    private var data: SWFRoot;
 
-    public function new(data:SWFRoot) {
+    public function new(data: SWFRoot) {
         this.data = data;
 
         bitmapAlpha = new Map<Int, ByteArray>();
@@ -96,14 +96,14 @@ class SWFLiteExporter {
         }
     }
 
-    private function addButton(tag:IDefinitionTag):SWFSymbol {
+    private function addButton(tag: IDefinitionTag): SWFSymbol {
         var symbol = new ButtonSymbol();
 
         if (Std.is(tag, IDefinitionTag)) {
             symbol.id = untyped tag.characterId;
         }
 
-        var processRecords = function(records:Array<SWFButtonRecord>) {
+        var processRecords = function(records: Array<SWFButtonRecord>) {
             if (records.length > 0) {
                 var sprite = new SpriteSymbol();
                 var frame = new Frame();
@@ -137,7 +137,7 @@ class SWFLiteExporter {
                     }
 
                     if (object.hasFilterList) {
-                        var filters:Array<FilterType> = [];
+                        var filters: Array<FilterType> = [];
 
                         for (filter in object.filterList) {
                             var type = filter.type;
@@ -167,7 +167,7 @@ class SWFLiteExporter {
         }
 
         if (Std.is(tag, TagDefineButton)) {
-            var defineButton:TagDefineButton = cast tag;
+            var defineButton: TagDefineButton = cast tag;
 
             symbol.downState = processRecords(defineButton.getRecordsByState(TagDefineButton.STATE_DOWN));
             symbol.hitState = processRecords(defineButton.getRecordsByState(TagDefineButton.STATE_HIT));
@@ -175,7 +175,7 @@ class SWFLiteExporter {
             symbol.upState = processRecords(defineButton.getRecordsByState(TagDefineButton.STATE_UP));
         }
         else {
-            var defineButton:TagDefineButton2 = cast tag;
+            var defineButton: TagDefineButton2 = cast tag;
 
             symbol.downState = processRecords(defineButton.getRecordsByState(TagDefineButton.STATE_DOWN));
             symbol.hitState = processRecords(defineButton.getRecordsByState(TagDefineButton.STATE_HIT));
@@ -188,13 +188,13 @@ class SWFLiteExporter {
         return symbol;
     }
 
-    private function addBitmap(tag:IDefinitionTag):BitmapSymbol {
+    private function addBitmap(tag: IDefinitionTag): BitmapSymbol {
         var alphaByteArray = null;
         var byteArray = null;
         var type = null;
 
         if (Std.is(tag, TagDefineBitsLossless)) {
-            var data:TagDefineBitsLossless = cast tag;
+            var data: TagDefineBitsLossless = cast tag;
 
             var transparent = (data.level > 1);
             var buffer = data.zlibBitmapData;
@@ -215,7 +215,7 @@ class SWFLiteExporter {
                     if (transparent) alpha.set(i, buffer.readUnsignedByte());
                 }
 
-                var paddedWidth:Int = Math.ceil(data.bitmapWidth / 4) * 4;
+                var paddedWidth: Int = Math.ceil(data.bitmapWidth / 4) * 4;
                 var values = Bytes.alloc(data.bitmapWidth * data.bitmapHeight + data.bitmapHeight);
                 index = 0;
 
@@ -236,7 +236,7 @@ class SWFLiteExporter {
                 }));
                 png.add(CPalette(palette));
                 if (transparent) png.add(CUnknown("tRNS", alpha));
-                var valuesBA:ByteArray = values;
+                var valuesBA: ByteArray = values;
                 valuesBA.compress();
                 png.add(CData(valuesBA));
                 png.add(CEnd);
@@ -261,7 +261,7 @@ class SWFLiteExporter {
             }
         }
         else if (Std.is(tag, TagDefineBitsJPEG2)) {
-            var data:TagDefineBitsJPEG2 = cast tag;
+            var data: TagDefineBitsJPEG2 = cast tag;
 
             if (Std.is(tag, TagDefineBitsJPEG3)) {
                 var alpha = cast(tag, TagDefineBitsJPEG3).bitmapAlphaData;
@@ -294,7 +294,7 @@ class SWFLiteExporter {
                     color: ColGrey(false),
                     interlaced: false
                 }));
-                var valuesBA:ByteArray = values;
+                var valuesBA: ByteArray = values;
                 valuesBA.compress();
                 png.add(CData(valuesBA));
                 png.add(CEnd);
@@ -313,7 +313,7 @@ class SWFLiteExporter {
             }
         }
         else if (Std.is(tag, TagDefineBits)) {
-            var data:TagDefineBits = cast tag;
+            var data: TagDefineBits = cast tag;
 
             byteArray = data.bitmapData;
             type = BitmapType.JPEG;
@@ -336,9 +336,9 @@ class SWFLiteExporter {
         return null;
     }
 
-    private function addFont(tag:IDefinitionTag):FontSymbol {
+    private function addFont(tag: IDefinitionTag): FontSymbol {
         if (Std.is(tag, TagDefineFont2)) {
-            var defineFont:TagDefineFont2 = cast tag;
+            var defineFont: TagDefineFont2 = cast tag;
             var symbol = new FontSymbol();
             symbol.id = defineFont.characterId;
             symbol.glyphs = new Array<Array<ShapeCommand>>();
@@ -369,7 +369,7 @@ class SWFLiteExporter {
         return null;
     }
 
-    private function addShape(tag:TagDefineShape):SWFSymbol {
+    private function addShape(tag: TagDefineShape): SWFSymbol {
         var handler = new ShapeCommandExporter(data);
         tag.export(handler);
 
@@ -392,7 +392,7 @@ class SWFLiteExporter {
 
                 processTag(cast data.getCharacter(bitmap.id));
 
-                var bitmapSymbol:BitmapSymbol = cast swfLite.symbols.get(bitmap.id);
+                var bitmapSymbol: BitmapSymbol = cast swfLite.symbols.get(bitmap.id);
 
                 if (bitmapSymbol != null) {
                     // Use smoothing if a shape requests it
@@ -444,7 +444,7 @@ class SWFLiteExporter {
         }
     }
 
-    private function addSprite(tag:SWFTimelineContainer, root:Bool = false):SpriteSymbol {
+    private function addSprite(tag: SWFTimelineContainer, root: Bool = false): SpriteSymbol {
         var symbol = new SpriteSymbol();
 
         if (Std.is(tag, IDefinitionTag)) {
@@ -455,7 +455,7 @@ class SWFLiteExporter {
         var lastModified = new Map<Int, Int>();
         var zeroCharacter = -1;
 
-        var frame, frameObject, frameData, placeTag:TagPlaceObject;
+        var frame, frameObject, frameData, placeTag: TagPlaceObject;
 
         for (frameData in tag.frames) {
             frame = new Frame();
@@ -511,7 +511,7 @@ class SWFLiteExporter {
                 }
 
                 if (placeTag.hasFilterList) {
-                    var filters:Array<FilterType> = [];
+                    var filters: Array<FilterType> = [];
 
                     for (surfaceFilter in placeTag.surfaceFilterList) {
                         var type = surfaceFilter.type;
@@ -584,7 +584,7 @@ class SWFLiteExporter {
         return symbol;
     }
 
-    private function addDynamicText(tag:TagDefineEditText):DynamicTextSymbol {
+    private function addDynamicText(tag: TagDefineEditText): DynamicTextSymbol {
         var symbol = new DynamicTextSymbol();
 
         symbol.id = tag.characterId;
@@ -628,7 +628,7 @@ class SWFLiteExporter {
 
         // embedded fonts
         if (tag.hasFont) {
-            var font:IDefinitionTag = cast data.getCharacter(tag.fontId);
+            var font: IDefinitionTag = cast data.getCharacter(tag.fontId);
 
             if (font != null) {
                 // processTag (font);
@@ -654,14 +654,14 @@ class SWFLiteExporter {
         return symbol;
     }
 
-    private function addStaticText(tag:TagDefineText):StaticTextSymbol {
+    private function addStaticText(tag: TagDefineText): StaticTextSymbol {
         var symbol = new StaticTextSymbol();
         symbol.id = tag.characterId;
 
         var records = [];
 
-        var font:FontSymbol = null;
-        var defineFont:TagDefineFont2 = null;
+        var font: FontSymbol = null;
+        var defineFont: TagDefineFont2 = null;
 
         for (record in tag.records) {
             var textRecord = new StaticTextRecord();
@@ -718,12 +718,12 @@ class SWFLiteExporter {
         return symbol;
     }
 
-    private function addSound(tag:IDefinitionTag):Void {
+    private function addSound(tag: IDefinitionTag): Void {
         if (Std.is(tag, TagDefineSound)) {
-            var defineSound:TagDefineSound = cast tag;
+            var defineSound: TagDefineSound = cast tag;
 
             var byteArray = defineSound.soundData;
-            var type:SoundType = switch (defineSound.soundFormat)
+            var type: SoundType = switch (defineSound.soundFormat)
             {
                 case 0: SoundType.UNCOMPRESSED_NATIVE_ENDIAN;
                 case 1: SoundType.ADPCM;
@@ -742,7 +742,7 @@ class SWFLiteExporter {
         return;
     }
 
-    private function processSymbol(symbol:format.swf.data.SWFSymbol):Void {
+    private function processSymbol(symbol: format.swf.data.SWFSymbol): Void {
         Log.info("", "processing symbol " + symbol.name);
 
         var data2 = processTag(cast data.getCharacter(symbol.tagId));
@@ -771,7 +771,7 @@ class SWFLiteExporter {
         if (!Std.is(data2, SpriteSymbol)) {
             return;
         }
-        var spriteSymbol:SpriteSymbol = cast data2;
+        var spriteSymbol: SpriteSymbol = cast data2;
 
         // find the as3 class definition
         var cls = data.abcData.findClassByName(symbol.name);
@@ -800,7 +800,7 @@ class SWFLiteExporter {
                             if (AVM2.FRAME_SCRIPT_METHOD_NAME.match(methodName.name)) {
                                 var frameNumOneIndexed = Std.parseInt(AVM2.FRAME_SCRIPT_METHOD_NAME.matched(1));
                                 Log.info("", "frame script #" + frameNumOneIndexed);
-                                var pcodes:Array<OpCode> = data.pcode[idx.getIndex()];
+                                var pcodes: Array<OpCode> = data.pcode[idx.getIndex()];
                                 var js = processOpCodes(pcodes, cls);
                                 Log.info("", "javascript:\n" + js);
 
@@ -821,17 +821,29 @@ class SWFLiteExporter {
         #end
     }
 
-    private function processOpCodes(pcodes:Array<OpCode>, cls:ClassDef) {
+    private function processOpCodes(pcodes: Array<OpCode>, cls: ClassDef) {
         var js = "";
-        var prop:MultiName = null;
-        var stack:Array<Dynamic> = new Array();
+        var prop: MultiName = null;
+        var stack: Array<Dynamic> = new Array();
+
+        var jumpEnds = new Array();
+
+        var bytes = new BytesOutput();
+        var writer = new format.abc.OpWriter(bytes);
+        var pcodeSize;
         for (pcode in pcodes) {
+            writer.write(pcode);
+            pcodeSize = bytes.length;
+            //Log.info("", "pcodeSize: " + pcodeSize);
+            //bytes = new BytesOutput();
+
             switch (pcode)
             {
                 case OThis:
                     stack.push("this");
                 case OScope:
-                    stack.pop();
+                    var tmp = stack.pop();
+                    Log.info("", "OScope: " + tmp);
                 case OFindPropStrict(nameIndex):
                 //										prop = data.abcData.resolveMultiNameByIndex(nameIndex);
                 case OGetLex(nameIndex):
@@ -841,7 +853,11 @@ class SWFLiteExporter {
                     var fullname = "";
 
                     if (prop != null) {
+                        //Log.info("", "prop:" + prop);
                         fullname += AVM2.getFullName(data.abcData, prop, cls);
+                        if (fullname == "parent") {
+                            fullname = "this." + fullname;
+                        }
                         stack.push(fullname);
                         Log.info("", "stack:" + stack);
                     }
@@ -880,7 +896,7 @@ class SWFLiteExporter {
 
                     var instance = stack.pop();
 
-                    if (instance != "this") {
+                    if (!instance.startsWith("this")) {
                         instance = "this" + "." + instance;
                     }
 
@@ -894,11 +910,16 @@ class SWFLiteExporter {
                 case OSmallInt(i):
                     stack.push(i);
                     Log.info("", "smallint: " + i);
+
                 case OCallPropVoid(nameIndex, argCount):
                     var temp = AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
-
+                    Log.info("", "OCallPropVoid stack:" + stack);
                     if (stack.length > 0) {
-                        js += stack.pop() + ".";
+                        var tmp = stack.pop();
+                        if (!tmp.startsWith('this')) {
+                            tmp = 'this.' + tmp;
+                        }
+                        js += tmp + ".";
                     }
                     else {
                         js += "this" + ".";
@@ -958,33 +979,46 @@ class SWFLiteExporter {
                             _operator = "*";
                         case OpAdd:
                             _operator = "+";
+                        case OpNot:
+                            _operator = "!";
+                        case OpEq:
+                            _operator = "==";
                         case _:
-                            Log.info("", "OOp");
+                            Log.info("", "OOp " + op);
                     }
 
                     if (op == OpAs) {
                         Log.info("", "cast to " + stack.pop() + " is discarded");
                     }
-
-                    if (_operator != null) {
+                    if (_operator == '!') {
+                        var tmp = stack.pop();
+                        stack.push("!(" + tmp + ")");
+                    } else if (_operator != null) {
                         var temp = stack.pop();
                         stack.push(Std.string(stack.pop()) + " " + _operator + " " + Std.string(temp));
                     }
                 case OJump(j, delta):
+                    Log.info("", "OJump, stack:" + Std.string(stack) + ", delta: " + delta + ', to: ' + (pcodeSize + delta));
+                    jumpEnds.push(pcodeSize + delta);
+                    jumpEnds.sort((a, b) -> {
+                        if (a > b) return -1;
+                        if (a < b) return 1;
+                        return 0;
+                    });
                     switch (j)
                     {
                         case JNeq:
                             // Log.info("", stack[0]);
                             var temp = stack.pop();
-                            js += "if (" + Std.string(stack.pop()) + " == " + Std.string(temp) + ")\n";
+                            js += "if (" + Std.string(stack.pop()) + " == " + Std.string(temp) + "){\n";
                         case JNotGt:
                             var temp = stack.pop();
-                            js += "if (" + Std.string(stack.pop()) + " > " + Std.string(temp) + ")\n";
+                            js += "if (" + Std.string(stack.pop()) + " > " + Std.string(temp) + "){\n";
                         case JAlways:
-                            js += "else\n";
+                            js += "}else{\n";
                             Log.info("", Std.string(delta));
                         case JFalse:
-                            js += "if (" + Std.string(stack.pop()) + ")\n";
+                            js += "if (" + Std.string(stack.pop()) + "){\n";
                         case _:
                             Log.info("", "OJump " + j);
                     }
@@ -1003,17 +1037,42 @@ class SWFLiteExporter {
                     var temp = processOpCodes(funcPcode, cls);
                     Log.info("", "code: " + temp);
                     stack.push('()=>{\n' + temp + '}');
+                case OPop:
+                    var tmp = stack.pop();
+                    Log.info("", "OPop: " + tmp);
                 case _:
                     // TODO: throw() on unsupported pcodes
                     Log.info("", "pcode " + pcode);
             }
+
+            if (jumpEnds.length > 0) {
+                if (pcodeSize > jumpEnds[0]) {
+                    Log.info("", "jumpEnds[0]: " + jumpEnds[0] + ' pcodeSize:' + pcodeSize);
+                    js += "}\n";
+                    jumpEnds.pop();
+                    Log.info("", Std.string(jumpEnds));
+                }
+            }
         }
+
+        while(jumpEnds.length > 0){
+            jumpEnds.pop();
+            js += "}\n";
+        }
+
         var regex = ~/this\.flash\.utils_setTimeout/g;
         js = regex.replace(js, "setTimeout");
+
+        regex = ~/this\.flash\.utils_clearTimeout/g;
+        js = regex.replace(js, "clearTimeout");
+
+        regex = ~/flash\.events_Event/g;
+        js = regex.replace(js, "openfl.events.Event");
+
         return js;
     }
 
-    private function processTag(tag:IDefinitionTag):SWFSymbol {
+    private function processTag(tag: IDefinitionTag): SWFSymbol {
         if (tag == null) return null;
 
         if (!swfLite.symbols.exists(tag.characterId)) {
@@ -1072,16 +1131,16 @@ enum SoundType {
  */
 typedef MultiName =
 {
-var name:String;
-var nameIndex:Index<Name>;
-var nameSpace:Namespace;
-var nameSpaceName:String;
+var name: String;
+var nameIndex: Index<Name>;
+var nameSpace: Namespace;
+var nameSpaceName: String;
 }
 
 class AVM2 {
     public static var FRAME_SCRIPT_METHOD_NAME = ~/frame(\d+)/;
 
-    public static function getIndex<T>(idx:Index<T>):Int {
+    public static function getIndex<T>(idx: Index<T>): Int {
         #if (haxe4 || (format > "3.4.2"))
 		return idx.asInt();
 		#else
@@ -1092,23 +1151,23 @@ class AVM2 {
         #end
     }
 
-    public static function getMultiNameByIndex(abcData:ABCData, i:Index<Name>):Name {
+    public static function getMultiNameByIndex(abcData: ABCData, i: Index<Name>): Name {
         return abcData.names[i.getIndex() - 1];
     }
 
-    public static function getStringByIndex(abcData:ABCData, i:Index<String>):String {
+    public static function getStringByIndex(abcData: ABCData, i: Index<String>): String {
         return abcData.strings[i.getIndex() - 1];
     }
 
-    public static function getNameSpaceByIndex(abcData:ABCData, i:Index<Namespace>):Namespace {
+    public static function getNameSpaceByIndex(abcData: ABCData, i: Index<Namespace>): Namespace {
         return abcData.namespaces[i.getIndex() - 1];
     }
 
-    public static function getFunctionByIndex(abcData:ABCData, i:Index<MethodType>):Function {
+    public static function getFunctionByIndex(abcData: ABCData, i: Index<MethodType>): Function {
         return abcData.functions[i.getIndex()];
     }
 
-    public static function resolveMultiNameByIndex(abcData:ABCData, i:Index<Name>):MultiName {
+    public static function resolveMultiNameByIndex(abcData: ABCData, i: Index<Name>): MultiName {
         var multiName = abcData.getMultiNameByIndex(i);
         switch (multiName)
         {
@@ -1146,7 +1205,7 @@ class AVM2 {
         return null;
     }
 
-    public static function findClassByName(abcData:ABCData, s:String):ClassDef {
+    public static function findClassByName(abcData: ABCData, s: String): ClassDef {
         var x = s.lastIndexOf(".");
         var pkgName = "";
         var clsName = s;
@@ -1172,7 +1231,7 @@ class AVM2 {
         return null;
     }
 
-    public static function classHasField(abcData:ABCData, cls:ClassDef, name:String):Bool {
+    public static function classHasField(abcData: ABCData, cls: ClassDef, name: String): Bool {
         var classHasField = false;
 
         for (field in cls.fields) {
@@ -1197,7 +1256,7 @@ class AVM2 {
         return classHasField;
     }
 
-    public static function getFullName(abcData:ABCData, prop:MultiName, cls:ClassDef):String {
+    public static function getFullName(abcData: ABCData, prop: MultiName, cls: ClassDef): String {
         var js = null;
 
         if (prop == null) {
@@ -1242,7 +1301,7 @@ class AVM2 {
         return js;
     }
 
-    public static function parseFunctionCall(abcData:ABCData, cls:ClassDef, nameIndex:IName, argCount:Int, stack:Array<Dynamic>):String {
+    public static function parseFunctionCall(abcData: ABCData, cls: ClassDef, nameIndex: IName, argCount: Int, stack: Array<Dynamic>): String {
         var prop = abcData.resolveMultiNameByIndex(nameIndex);
         if (prop == null) {
             Log.info("", "parseFunctionCall is stopped, prop = null");
