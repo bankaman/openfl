@@ -930,14 +930,10 @@ class SWFLiteExporter {
                 case OCallProperty(nameIndex, argCount):
                     Log.info("", "OCallProperty stack: " + stack);
 
-                    if (prop != null) {
-                        var temp = AVM2.getFullName(data.abcData, prop, cls)
-                        + "."
-                        + AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
-                        stack.pop();
-                        stack.push(temp);
-                    }
-                    Log.info("", "stack: " + stack);
+                    var temp = AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
+                    temp = stack.pop() + "." + temp;
+                    stack.push(temp);
+
                 case OConstructProperty(nameIndex, argCount):
                     Log.info("", "OConstructProperty stack: " + stack);
 
@@ -1027,8 +1023,10 @@ class SWFLiteExporter {
                 case OFalse:
                     stack.push(false);
                 case OSetReg(reg):
-                    Log.info("", "OSetReg(" + reg + "): stack:" + stack);
-                //js += "var r" + reg + "=" + stack.pop() + ";\n";
+                    //Log.info("", "OSetReg(" + reg + "): stack:" + stack);
+                    js += "var r" + reg + " = " + stack.pop() + ";\n";
+                case OReg(reg):
+                    stack.push("r" + reg);
                 case ONewBlock:
                     Log.info("", "ONewBlock " + stack);
                 case OFunction(nameIndex):
@@ -1055,7 +1053,7 @@ class SWFLiteExporter {
             }
         }
 
-        while(jumpEnds.length > 0){
+        while (jumpEnds.length > 0) {
             jumpEnds.pop();
             js += "}\n";
         }
@@ -1307,8 +1305,9 @@ class AVM2 {
             Log.info("", "parseFunctionCall is stopped, prop = null");
             return "";
         }
-        //Log.info("","parseFunctionCall stack:"+ stack);
+        //Log.info("", "parseFunctionCall stack:" + stack);
         var js = getFullName(abcData, prop, cls);
+        //Log.info("", "js: " + js);
         // invoke function
         js += "(";
 
