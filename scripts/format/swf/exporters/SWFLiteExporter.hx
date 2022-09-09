@@ -1015,6 +1015,10 @@ class SWFLiteExporter {
                             Log.info("", Std.string(delta));
                         case JFalse:
                             js += "if (" + Std.string(stack.pop()) + "){\n";
+                        case JEq:
+                            var op2 = Std.string(stack.pop());
+                            var op1 = Std.string(stack.pop());
+                            js += "if (" + op1 + " != " + op2 + "){\n";
                         case _:
                             Log.info("", "OJump " + j);
                     }
