@@ -866,8 +866,15 @@ class SWFLiteExporter {
 
                     prop = data.abcData.resolveMultiNameByIndex(nameIndex);
 
+                    //Log.info("", "prop: " + prop + "stack: " + stack);
+
                     if (prop != null) {
-                        fullname += stack.pop() + "." + AVM2.getFullName(data.abcData, prop, cls);
+                        if (prop.nameSpace == null && prop.name == null) {
+                            var index = stack.pop();
+                            fullname += stack.pop() + '[' + index + ']';
+                        } else {
+                            fullname += stack.pop() + "." + AVM2.getFullName(data.abcData, prop, cls);
+                        }
                     }
 
                     Log.info("", "OGetProp fullname: " + fullname);
