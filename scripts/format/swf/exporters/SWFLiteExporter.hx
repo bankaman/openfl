@@ -922,8 +922,8 @@ class SWFLiteExporter {
                     var temp = AVM2.parseFunctionCall(data.abcData, cls, nameIndex, argCount, stack);
                     Log.info("", "OCallPropVoid stack:" + stack);
                     if (stack.length > 0) {
-                        var tmp = stack.pop();
-                        if (!tmp.startsWith('this')) {
+                        var tmp: String = stack.pop();
+                        if ((tmp != null) && (!tmp.startsWith('this.'))) {
                             tmp = 'this.' + tmp;
                         }
                         js += tmp + ".";
@@ -1077,6 +1077,9 @@ class SWFLiteExporter {
 
         regex = ~/flash\.events_Event/g;
         js = regex.replace(js, "openfl.events.Event");
+
+        regex = ~/this\.console\.log/g;
+        js = regex.replace(js, "console.log");
 
         return js;
     }
